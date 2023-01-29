@@ -127,7 +127,7 @@ open class Chart: UIControl {
     The color used for the labels.
     */
     @IBInspectable
-    open var labelColor: UIColor = UIColor.black
+    open var labelColor: UIColor = UIColor.label
 
     /**
     Color for the axes.
@@ -667,10 +667,10 @@ open class Chart: UIControl {
         let padding: CGFloat = 5
         scaled.enumerated().forEach { (i, value) in
             let x = CGFloat(value)
-            let isLastLabel = x == drawingWidth
+            // Previous compare (let isLastLabel = x == drawingWidth) was subject to floating point rounding errors
+            let isLastLabel = i == (labels.count - 1)
 
             // Add vertical grid for each label, except axes on the left and right
-
             if x != 0 && x != drawingWidth {
                 context.move(to: CGPoint(x: x, y: topPadding))
                 context.addLine(to: CGPoint(x: x, y: bounds.height))
@@ -698,7 +698,8 @@ open class Chart: UIControl {
                 label.frame.origin.x += padding
 
                 // Set label's text alignment
-                label.frame.size.width = (drawingWidth / CGFloat(labels.count)) - padding * 2
+                let printedLabelCount = xLabelsSkipLast && labels.count > 1 ? CGFloat(labels.count - 1) : CGFloat(labels.count)
+                label.frame.size.width = (drawingWidth / printedLabelCount) - padding * 2
                 label.textAlignment = xLabelsTextAlignment
             } else {
                 label.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi / 2))
